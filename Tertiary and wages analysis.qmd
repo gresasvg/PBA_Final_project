@@ -25,6 +25,7 @@ require(readxl)
 require(tidyr)
 require(scales)
 require(patchwork)
+require(broom)
 
 ```
 
@@ -717,10 +718,20 @@ dt_earn_perc_field <- dt_earning_field %>%
             by = c("Country", "Field of Study")) %>%
   select(Country, `Field of Study`,`Relative Earning`,`Percentage of Students`)
 
+dt_earn_perc_field$`Field of Study` <- factor(
+  dt_earn_perc_field$`Field of Study`,
+  levels = c(
+      "Science, Technology, Engineering, Mathematics",
+      "Business, administration and law",
+      "Health and welfare",
+      "Arts and humanities, social sciences"
+  )
+)
+
 dt_earn_perc_field$Country <- factor(
   dt_earn_perc_field$Country,
   levels = c(
-    "US", "UK",       # English-speaking
+    "US", "UK",                              # English-speaking
     "France", "Germany", "Sweden", "Spain",  # Europe
     "Japan", "Korea"                         # Asia
   )
@@ -825,3 +836,122 @@ guides(
 ```
 
 Excluding the Arts field reveals a strong and robust positive relationship between tertiary specialization and earnings across countries. This suggests that, unlike Arts—which has highly variable returns across national labor markets—STEM and business fields show more uniform, market-driven patterns of reward internationally, reinforcing the idea that labor-market demand for these skills is globally persistent.
+
+# First analysis
+
+## Analysis 1 
+
+### Find percentage in field of study and Wages relationships
+
+```{r find r for all countries}
+
+corr_all <- df_plot %>%
+  summarise(
+    corr = cor(`Relative Earning`, `Percentage of Students`,
+               use = "complete.obs", method = "pearson")
+  )
+
+df_plot_centered <- df_plot %>%
+  mutate(
+    perc_centered = `Percentage of Students` - mean(`Percentage of Students`, na.rm = TRUE)
+  )
+
+
+ggplot(df_plot_centered,
+       aes(x = perc_centered , y = `Relative Earning`, color = `Field of Study`)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(aes(group = 1, color = NULL), method = "lm", se = FALSE) +  
+  labs(x = "Percentage of Students (centered)", y = "Relative Earning",
+       title = "Earnings vs Tertiary Share") +
+  geom_text(
+    data = corr_all,
+    aes(x = -Inf, y = Inf, label = paste0("r = ", round(corr, 2))),
+    hjust = -0.1, vjust = 1.2,
+    color = "black", size = 4,
+    inherit.aes = FALSE
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "top",
+    legend.box = "vertical",
+    legend.title = element_text(size = 9),
+    legend.text  = element_text(size = 9),
+    axis.text.y  = element_text(size = 10),
+    axis.text.x  = element_text(size = 10),
+    axis.title.x = element_text(size = 10),
+    axis.title.y = element_text(size = 10),
+    plot.caption = element_text(size = 8),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 10, hjust = 0.5)
+  ) +
+guides(
+    color = guide_legend(nrow = 2, byrow = TRUE)
+  )
+
+fit.all <- lm(`Relative Earning` ~ perc_centered, data = df_plot_centered)
+coef(fit.all)
+glance(fit.all)
+
+```
+
+
+```{r find r for all countries except ART}
+
+# Exclude Arts and humanities, social sciences for correlation
+df_no_art <- df_plot %>%
+  filter(`Field of Study` != "Arts and humanities, social sciences")
+
+corr_no_art <- df_no_art %>%
+  summarise(
+    corr = cor(`Percentage of Students`, `Relative Earning`,
+               use = "complete.obs", method = "pearson")
+  )
+
+df_no_art_centered <- df_no_art %>%
+  mutate(
+    perc_centered = `Percentage of Students` - mean(`Percentage of Students`, na.rm = TRUE)
+  )
+
+ggplot(df_no_art_centered,
+       aes(x = perc_centered, y = `Relative Earning`, color = `Field of Study`)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(aes(group = 1, color = NULL), method = "lm", se = FALSE) +  
+  labs(x = "Percentage of Students (centered)", y = "Relative Earning",
+       title = "Earnings vs Tertiary Share w/o Art") +
+  geom_text(
+    data = corr_no_art,
+    aes(x = -Inf, y = Inf, label = paste0("r = ", round(corr, 2))),
+    hjust = -0.1, vjust = 1.2,
+    color = "black", size = 4,
+    inherit.aes = FALSE
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "top",
+    legend.box = "vertical",
+    legend.title = element_text(size = 9),
+    legend.text  = element_text(size = 9),
+    axis.text.y  = element_text(size = 10),
+    axis.text.x  = element_text(size = 10),
+    axis.title.x = element_text(size = 10),
+    axis.title.y = element_text(size = 10),
+    plot.caption = element_text(size = 8),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 10, hjust = 0.5)
+  ) +
+guides(
+    color = guide_legend(nrow = 2, byrow = TRUE)
+  )
+
+fit.no_art <- lm(`Relative Earning` ~ perc_centered, data = df_no_art_centered)
+coef(fit.no_art)
+glance(fit.no_art)
+
+```
+
+We observe a positive correlation between the percentage of students in each field of study and their relative earnings. As shown in the previous chart, the Arts field exhibits much larger cross-country variation in relative earnings and a larger deviation from the linear regression line. This motivates examining the relationship excluding the Arts field. \\
+When we fit the models, the regression that includes all fields yields an R² of approximately 0.17, whereas the model excluding Arts achieves an R² of about 0.56. This indicates that removing the Arts field substantially improves the model’s explanatory power.
+
+
