@@ -955,3 +955,113 @@ We observe a positive correlation between the percentage of students in each fie
 When we fit the models, the regression that includes all fields yields an R² of approximately 0.17, whereas the model excluding Arts achieves an R² of about 0.56. This indicates that removing the Arts field substantially improves the model’s explanatory power.
 
 
+#Analysis 2
+
+#Educational Attainment 
+
+#Relationship Between Education Level and Attainment Shares
+
+{r}
+attainment_reg <- attainment_final %>%
+  filter(!is.na(Percent)) %>%
+  mutate(
+    Edu_numeric = as.numeric(factor(Education_Level,
+                                    levels = c("Below upper secondary",
+                                               "Upper secondary",
+                                               "Tertiary")))
+  )
+
+model_attainment <- lm(Percent ~ Edu_numeric, data = attainment_reg)
+summary(model_attainment)
+
+ggplot(attainment_reg, aes(x = Edu_numeric, y = Percent, color = Education_Level)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  scale_x_continuous(
+    breaks = c(1, 2, 3),
+    labels = c("Below upper", "Upper", "Tertiary")
+  ) +
+  labs(
+    title = "Linear Relationship Between Education Level and Attainment (%)",
+    subtitle = paste0("R² = ", round(summary(model_attainment)$r.squared, 3),
+                      " | Adjusted R² = ", round(summary(model_attainment)$adj.r.squared, 3)),
+    x = "Education Level",
+    y = "Percent of Population"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "none")
+
+Explanation: We observe a strong positive relationship between education level and the share of the population attaining it. The regression shows that each step up in education level increases attainment by approximately 15 percentage points (β = 15.02, p < 0.001). The model fits well, with an adjusted R² of 0.658, meaning that nearly two-thirds of the variation in attainment is explained by education level alone. This confirms the visual finding that tertiary education is the most common educational attainment across countries, followed by upper secondary, with below-upper-secondary being the least common.
+
+#Analysis 3
+
+#Fields of Study
+
+#Relationship Between Field of Study and Graduate Shares
+
+{r}
+graduates_reg <- graduates_long %>%
+  filter(!is.na(Percent)) %>%
+  mutate(
+    Field_index = as.numeric(factor(Field_of_study,
+                                    levels = c(
+                                      "Education",
+                                      "Arts and humanities",
+                                      "Social sciences, journalism and information",
+                                      "Business, administration and law",
+                                      "Natural sciences, mathematics and statistics",
+                                      "ICT",
+                                      "Engineering, manufacturing and construction",
+                                      "Health and welfare"
+                                    )))
+  )
+
+model_field <- lm(Percent ~ Field_index, data = graduates_reg)
+summary(model_field)
+
+
+Explanation: The results show that the coefficient for field index (β = 0.53) is not statistically significant (p = 0.146). The model explains only 3.4% of the variation in graduate shares (Adjusted R² = 0.019), indicating a very weak fit.
+
+This outcome is expected because field-of-study choice is inherently categorical, not continuous. There is no linear relationship between field index and the percentage of tertiary graduates in that field. Field popularity varies by country due to differences in national economies, higher education systems, and labor market demands, rather than following any increasing or decreasing trend.
+
+#Analysis 4: PPP-Adjusted Annual Wages
+
+#Relationship Between Country and PPP-Adjusted Wages
+
+{r}
+wages_reg <- wages %>%
+  mutate(
+    Country_index = as.numeric(factor(Country))
+  )
+model_wages <- lm(Wage_PPP ~ Country_index, data = wages_reg)
+summary(model_wages)
+
+Explanation: This regression evaluates whether PPP-adjusted annual wages follow a linear pattern across the selected OECD countries. The coefficient for country index (β = 2,783) is not statistically significant (p = 0.230), indicating that wage differences do not follow any meaningful linear order based on how countries were numerically indexed. The model's explanatory power is weak, with an Adjusted R² of only 0.126, meaning that the regression explains just 12.6% of the variation in wages.
+
+PPP-adjusted wages differ substantially between countries, but these differences cannot be explained through a linear trend. Instead, wage variations are shaped by country-specific economic structures and labor market characteristics, rather than any numeric ordering of nations.
+
+#Analysis 5: Relative Earnings by Education Level and Age Group
+
+#Effect of Education Level and Age Group on Relative Earnings
+
+{r}
+reg_data <- data_long4 %>%
+  filter(earnings_label == "Reported") %>%   # remove missing
+  mutate(
+    education4 = factor(education4,
+                        levels = c("Below upper secondary",
+                                   "Upper secondary",
+                                   "Tertiary")),
+    age_group = factor(age_group,
+                       levels = c("25-34 year-olds",
+                                  "45-54 year-olds",
+                                  "25-64 year-olds"))
+  )
+
+model_earnings <- lm(earnings ~ education4 + age_group, data = reg_data)
+summary(model_earnings)
+
+
+Explanation: The regression results show that education level is the strongest and most consistent predictor of relative earnings. Compared to the reference group (upper-secondary graduates), tertiary-educated workers earn approximately 57% more on average (β = 57.33, p < 0.001). This is a large, statistically significant wage premium, confirming the strong advantage associated with higher education.
+
+Workers with upper-secondary education earn about 17% more than those with below-upper-secondary attainment, although this effect is only marginally significant (p = 0.083). This still suggests that completing upper-secondary education provides meaningful economic benefits relative to not completing it. Overall, the regression model fits the data well, explaining nearly 50% of the variation in relative earnings (Adjusted R² = 0.478). This is a strong model fit given the cross-country nature of the dataset and confirms that education is the primary factor shaping earning differences.
