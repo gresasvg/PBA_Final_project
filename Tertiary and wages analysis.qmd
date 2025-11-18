@@ -955,12 +955,9 @@ We observe a positive correlation between the percentage of students in each fie
 When we fit the models, the regression that includes all fields yields an R² of approximately 0.17, whereas the model excluding Arts achieves an R² of about 0.56. This indicates that removing the Arts field substantially improves the model’s explanatory power.
 
 
-#Analysis 2
+# Analysis 2
 
-#Educational Attainment 
-
-#Relationship Between Education Level and Attainment Shares
-
+#Educational Attainment:Relationship Between Education Level and Attainment Shares
 ```{r}
 attainment_reg <- attainment_final %>%
   filter(!is.na(Percent)) %>%
@@ -996,10 +993,7 @@ Explanation: We observe a strong positive relationship between education level a
 
 
 # Analysis 3 
-
-#Fields of Study
-
-#Relationship Between Field of Study and Graduate Shares
+#Fields of Study:Relationship Between Field of Study and Graduate Shares
 ```{r}
 graduates_reg <- graduates_long %>%
   filter(!is.na(Percent)) %>%
@@ -1024,10 +1018,8 @@ Explanation: The results show that the coefficient for field index (β = 0.53) i
 
 This outcome is expected because field-of-study choice is inherently categorical, not continuous. There is no linear relationship between field index and the percentage of tertiary graduates in that field. Field popularity varies by country due to differences in national economies, higher education systems, and labor market demands, rather than following any increasing or decreasing trend.
 
-#Analysis 4: PPP-Adjusted Annual Wages
-
-#Relationship Between Country and PPP-Adjusted Wages
-
+# Analysis 4
+#PPP-Adjusted Annual Wages:Relationship Between Country and PPP-Adjusted Wages
 ```{r}
 wages_reg <- wages %>%
   mutate(
@@ -1040,10 +1032,8 @@ Explanation: This regression evaluates whether PPP-adjusted annual wages follow 
 
 PPP-adjusted wages differ substantially between countries, but these differences cannot be explained through a linear trend. Instead, wage variations are shaped by country-specific economic structures and labor market characteristics, rather than any numeric ordering of nations.
 
-#Analysis 5:Relative Earnings by Education Level and Age Group
-
-#Effect of Education Level and Age Group on Relative Earnings
-
+# Analysis 5
+#Relative Earnings by Education Level and Age Group
 ```{r}
 reg_data <- data_long4 %>%
   filter(earnings_label == "Reported") %>%   # remove missing
