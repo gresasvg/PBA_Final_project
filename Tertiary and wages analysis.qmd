@@ -991,17 +991,15 @@ ggplot(attainment_reg, aes(x = Edu_numeric, y = Percent, color = Education_Level
   theme_minimal(base_size = 11) +
   theme(legend.position = "none")
 
-
 ```
 Explanation: We observe a strong positive relationship between education level and the share of the population attaining it. The regression shows that each step up in education level increases attainment by approximately 15 percentage points (β = 15.02, p < 0.001). The model fits well, with an adjusted R² of 0.658, meaning that nearly two-thirds of the variation in attainment is explained by education level alone. This confirms the visual finding that tertiary education is the most common educational attainment across countries, followed by upper secondary, with below-upper-secondary being the least common.
 
-```
-#Analysis 3
+
+# Analysis 3 
 
 #Fields of Study
 
 #Relationship Between Field of Study and Graduate Shares
-
 ```{r}
 graduates_reg <- graduates_long %>%
   filter(!is.na(Percent)) %>%
@@ -1021,12 +1019,11 @@ graduates_reg <- graduates_long %>%
 
 model_field <- lm(Percent ~ Field_index, data = graduates_reg)
 summary(model_field)
-
 ```
 Explanation: The results show that the coefficient for field index (β = 0.53) is not statistically significant (p = 0.146). The model explains only 3.4% of the variation in graduate shares (Adjusted R² = 0.019), indicating a very weak fit.
 
 This outcome is expected because field-of-study choice is inherently categorical, not continuous. There is no linear relationship between field index and the percentage of tertiary graduates in that field. Field popularity varies by country due to differences in national economies, higher education systems, and labor market demands, rather than following any increasing or decreasing trend.
-```
+
 #Analysis 4: PPP-Adjusted Annual Wages
 
 #Relationship Between Country and PPP-Adjusted Wages
@@ -1042,8 +1039,8 @@ summary(model_wages)
 Explanation: This regression evaluates whether PPP-adjusted annual wages follow a linear pattern across the selected OECD countries. The coefficient for country index (β = 2,783) is not statistically significant (p = 0.230), indicating that wage differences do not follow any meaningful linear order based on how countries were numerically indexed. The model's explanatory power is weak, with an Adjusted R² of only 0.126, meaning that the regression explains just 12.6% of the variation in wages.
 
 PPP-adjusted wages differ substantially between countries, but these differences cannot be explained through a linear trend. Instead, wage variations are shaped by country-specific economic structures and labor market characteristics, rather than any numeric ordering of nations.
-```
-#Analysis 5: Relative Earnings by Education Level and Age Group
+
+#Analysis 5:Relative Earnings by Education Level and Age Group
 
 #Effect of Education Level and Age Group on Relative Earnings
 
@@ -1063,7 +1060,6 @@ reg_data <- data_long4 %>%
 
 model_earnings <- lm(earnings ~ education4 + age_group, data = reg_data)
 summary(model_earnings)
-
 ```
 Explanation: The regression results show that education level is the strongest and most consistent predictor of relative earnings. Compared to the reference group (upper-secondary graduates), tertiary-educated workers earn approximately 57% more on average (β = 57.33, p < 0.001). This is a large, statistically significant wage premium, confirming the strong advantage associated with higher education.
 
